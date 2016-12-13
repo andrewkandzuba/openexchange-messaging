@@ -1,0 +1,12 @@
+# For testing purpose only
+version: '2.0'
+services:
+  configserver:
+    image: openexchange/configserver:latest
+    depends_on:
+      - "registry"
+    command: 'nc -vz registry 8761'
+  registry:
+    image: openexchange/registry:latest
+    ports:
+      - "8761:8761"

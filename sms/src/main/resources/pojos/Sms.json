@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Sms details",
+  "type": "object",
+  "id": "Sms",
+  "additionalProperties": false,
+  "generate-builders": true,
+  "properties": {
+    "messageId": {
+      "type": "string",
+      "format": "uuid",
+      "required": true
+    },
+    "mobileOriginate": {
+      "type": "string",
+      "format": "phone",
+      "required": true
+    },
+    "mobileTerminate": {
+      "type": "string",
+      "format": "phone",
+      "required": true
+    },
+    "text": {
+      "type": "string",
+      "required": true
+    },
+    "receiveTime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
