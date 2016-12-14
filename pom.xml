@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>openexchange-messaging</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>openexchange ::: ${project.artifactId}</name>
@@ -23,8 +23,4 @@
         <module>integration-tests</module>
     </modules>
 
-
-  <scm>
-    <tag>openexchange-messaging-1.0.1</tag>
-  </scm>
 </project>
