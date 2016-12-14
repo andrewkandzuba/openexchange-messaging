@@ -14,6 +14,13 @@
 
     <name>openexchange ::: ${project.artifactId}</name>
 
+    <scm>
+        <developerConnection>
+            scm:git:[fetch=]https://github.com/andrewkandzuba/${project.artifactId}.git[push=]git@github.com:andrewkandzuba/${project.artifactId}.git
+        </developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <modules>
         <module>sms</module>
         <module>activemq-sms-transport</module>
