@@ -4,12 +4,12 @@
 
     <parent>
         <groupId>org.openexchange</groupId>
-        <artifactId>openexchange-parent</artifactId>
+        <artifactId>openexchange-boot-starter-parent</artifactId>
         <version>1.0.1</version>
     </parent>
 
     <artifactId>openexchange-messaging</artifactId>
-    <version>1.0.7-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>openexchange ::: ${project.artifactId}</name>
