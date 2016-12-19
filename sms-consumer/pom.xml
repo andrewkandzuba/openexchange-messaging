@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.openexchange</groupId>
+        <groupId>io.openexchange</groupId>
         <artifactId>openexchange-messaging</artifactId>
         <version>1.0.2-SNAPSHOT</version>
     </parent>
@@ -25,15 +25,15 @@
     <dependencies>
         <dependency>
             <artifactId>openexchange-boot-batch</artifactId>
-            <groupId>org.openexchange</groupId>
+            <groupId>io.openexchange</groupId>
         </dependency>
         <dependency>
-            <groupId>org.openexchange</groupId>
+            <groupId>io.openexchange</groupId>
             <artifactId>sms</artifactId>
             <version>1.0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.openexchange</groupId>
+            <groupId>io.openexchange</groupId>
             <artifactId>rabbitmq-sms-transport</artifactId>
             <version>1.0.2-SNAPSHOT</version>
         </dependency>
