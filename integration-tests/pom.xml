@@ -43,9 +43,9 @@
         <rabbitmq.management.port>15672</rabbitmq.management.port>
         <mysql.user.name>dev</mysql.user.name>
         <mysql.user.password>changeit</mysql.user.password>
+        <mysql.sms-consumer.schema>messaging</mysql.sms-consumer.schema>
         <mysql.rootuser.password>root-changeit</mysql.rootuser.password>
         <mysql.port>3306</mysql.port>
-        <docker.host.address>192.168.99.100</docker.host.address>
         <docker.wait.timeout>240000</docker.wait.timeout>
         <sms-producer.server.port>8085</sms-producer.server.port>
         <sms-consumer.server.port>8084</sms-consumer.server.port>
@@ -140,6 +140,7 @@
                                     <port>${rabbitmq.port}:${rabbitmq.port}</port>
                                     <port>${rabbitmq.management.port}:${rabbitmq.management.port}</port>
                                 </ports>
+                                <net>host</net>
                                 <wait>
                                     <http>
                                         <url>http://${docker.host.address}:${rabbitmq.management.port}</url>
@@ -162,6 +163,10 @@
                                 <ports>
                                     <port>${registry.server.port}:${registry.server.port}</port>
                                 </ports>
+                                <net>host</net>
+                                <env>
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G</JAVA_OPTS>
+                                </env>
                                 <dependsOn>
                                     <dependsOn>rabbitmq:3-management</dependsOn>
                                 </dependsOn>
@@ -187,6 +192,11 @@
                                 <ports>
                                     <port>${configuration.server.port}:${configuration.server.port}</port>
                                 </ports>
+                                <net>host</net>
+                                <env>
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G -Dspring.cloud.config.server.git.uri=${configuration.server.git.repo} -Dsecurity.user.password=${configuration.server.password} -Deureka.instance.metadataMap.user=${configuration.server.user} -Deureka.instance.metadataMap.password=${configuration.server.password}
+                                    </JAVA_OPTS>
+                                </env>
                                 <dependsOn>
                                     <dependsOn>%g/registry:${project.version}</dependsOn>
                                 </dependsOn>
@@ -218,6 +228,11 @@
                                 <ports>
                                     <port>${sms-producer.server.port}:${sms-producer.server.port}</port>
                                 </ports>
+                                <net>host</net>
+                                <env>
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G -Deureka.instance.nonSecurePort=${sms-producer.server.port} -Dopenexchange.sms.producer.job.parallelism=1 -Dopenexchange.sms.producer.job.repeatIntervalTimeUnit=SECONDS
+                                    </JAVA_OPTS>
+                                </env>
                                 <dependsOn>
                                     <dependsOn>openexchange/configserver:latest</dependsOn>
                                 </dependsOn>
@@ -244,9 +259,13 @@
                                     <name>on-failure</name>
                                     <retry>5</retry>
                                 </restartPolicy>
+                                <net>host</net>
                                 <ports>
                                     <port>${sms-consumer.server.port}:${sms-consumer.server.port}</port>
                                 </ports>
+                                <env>
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G -Deureka.instance.nonSecurePort=${sms-consumer.server.port} -Dspring.datasource.driver-class-name=com.mysql.jdbc.Driver -Dspring.datasource.url=jdbc:mysql://${docker.host.address}:3306/${mysql.sms-consumer.schema} -Dspring.datasource.username=${mysql.user.name} -Dspring.datasource.password=${mysql.user.password} -Dopenexchange.sms.consumer.job.parallelism=1 -Dopenexchange.sms.consumer.job.repeatIntervalTimeUnit=SECONDS</JAVA_OPTS>
+                                </env>
                                 <dependsOn>
                                     <dependsOn>openexchange/configserver:latest</dependsOn>
                                 </dependsOn>
@@ -266,11 +285,17 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>start</id>
-                        <phase>pre-integration-test</phase>
+                        <id>docker</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>remove</goal>
                             <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>start</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
                             <goal>start</goal>
                         </goals>
                     </execution>
@@ -279,7 +304,6 @@
                         <phase>post-integration-test</phase>
                         <goals>
                             <goal>stop</goal>
-                            <goal>remove</goal>
                         </goals>
                     </execution>
                 </executions>

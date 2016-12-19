@@ -124,22 +124,13 @@
                                                     <include>${project.groupId}:sms-producer:jar:${project.version}
                                                     </include>
                                                 </includes>
-                                                <outputFileNameMapping>app.jar</outputFileNameMapping>
+                                                <outputFileNameMapping>sms-producer.jar</outputFileNameMapping>
                                             </dependencySet>
                                         </dependencySets>
                                     </inline>
                                 </assembly>
                                 <entryPoint>
-                                    <shell>java -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G \
-                                        -Djava.security.egd=file:/dev/urandom \
-                                        -Dvcap.services.eureka-service.credentials.uri=http://${docker.host.address}:${registry.server.port} \
-                                        -Deureka.instance.hostname=${docker.host.address} \
-                                        -Deureka.instance.nonSecurePort=${sms-producer.server.port} \
-                                        -Dspring.rabbitmq.host=${docker.host.address} \
-                                        -Dopenexchange.sms.producer.job.parallelism=1 \
-                                        -Dopenexchange.sms.producer.job.repeatIntervalTimeUnit=SECONDS \
-                                        -jar \
-                                        /maven/app.jar
+                                    <shell>java $JAVA_OPTS -Djava.security.egd=file:/dev/urandom -jar /maven/sms-producer.jar
                                     </shell>
                                 </entryPoint>
                             </build>
@@ -148,8 +139,8 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>start</id>
-                        <phase>pre-integration-test</phase>
+                        <id>docker</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>build</goal>
                         </goals>

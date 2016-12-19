@@ -8,13 +8,14 @@ The local CI environment composer developed on top of io.fabric8::docker-maven-p
 
 During this phase following images are being built:
 
-- _openexchange/registry:latest_ - Eureka based Service Registry.
-- _openexchange/configserver:latest_ Spring Cloud based configuration service integrated with GitHub configuration. 
-- _openexchange/start_dependencies:latest_ - an empty image suites only to control containers launch order.
+- __openexchange/mysql__ - MySQL image with users / schema initialization scripts.
+- __rabbitmq__ - A popular AMPQ implementation serves as a service communication bus 
+- __openexchange/registry:latest__ - Eureka based Service Registry.
+- __openexchange/configserver:latest__ - Spring Cloud based configuration service integrated with GitHub configuration. 
 
 ## start
 
-The containers runs in the following order: registry -> configserver -> start_dependencies
+The containers runs in the following order: mysql -> rabbitmq -> registry -> configserver
 
 ## stop / remove
                                  
