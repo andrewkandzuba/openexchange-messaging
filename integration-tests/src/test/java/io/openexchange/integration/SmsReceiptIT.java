@@ -12,11 +12,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = SmsReceiptIntegrationTest.class)
+@SpringBootTest(classes = SmsReceiptIT.class)
 @ComponentScan(basePackages = "io.openexchange.integration")
 @TestPropertySource(locations = "classpath:test.properties")
-//@ActiveProfiles("integration-test")
-public class SmsReceiptIntegrationTest {
+public class SmsReceiptIT {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

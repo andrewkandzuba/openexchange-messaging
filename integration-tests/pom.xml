@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -78,6 +79,10 @@
                 <artifactId>maven-resources-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${fabric8.docker-maven-plugin.version}</version>
@@ -121,7 +126,9 @@
                                     </tcp>
                                     <time>${docker.wait.timeout}</time>
                                     <exec>
-                                        <postStart>/maven/docker-entrypoint-initdb.d/init_db.sh ${mysql.rootuser.password}</postStart>
+                                        <postStart>/maven/docker-entrypoint-initdb.d/init_db.sh
+                                            ${mysql.rootuser.password}
+                                        </postStart>
                                     </exec>
                                 </wait>
                                 <ports>
@@ -165,7 +172,8 @@
                                 </ports>
                                 <net>host</net>
                                 <env>
-                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G</JAVA_OPTS>
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G
+                                    </JAVA_OPTS>
                                 </env>
                                 <dependsOn>
                                     <dependsOn>rabbitmq:3-management</dependsOn>
@@ -194,7 +202,11 @@
                                 </ports>
                                 <net>host</net>
                                 <env>
-                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G -Dspring.cloud.config.server.git.uri=${configuration.server.git.repo} -Dsecurity.user.password=${configuration.server.password} -Deureka.instance.metadataMap.user=${configuration.server.user} -Deureka.instance.metadataMap.password=${configuration.server.password}
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G
+                                        -Dspring.cloud.config.server.git.uri=${configuration.server.git.repo}
+                                        -Dsecurity.user.password=${configuration.server.password}
+                                        -Deureka.instance.metadataMap.user=${configuration.server.user}
+                                        -Deureka.instance.metadataMap.password=${configuration.server.password}
                                     </JAVA_OPTS>
                                 </env>
                                 <dependsOn>
@@ -230,7 +242,10 @@
                                 </ports>
                                 <net>host</net>
                                 <env>
-                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G -Deureka.instance.nonSecurePort=${sms-producer.server.port} -Dopenexchange.sms.producer.job.parallelism=1 -Dopenexchange.sms.producer.job.repeatIntervalTimeUnit=SECONDS
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G
+                                        -Deureka.instance.nonSecurePort=${sms-producer.server.port}
+                                        -Dopenexchange.sms.producer.job.parallelism=1
+                                        -Dopenexchange.sms.producer.job.repeatIntervalTimeUnit=SECONDS
                                     </JAVA_OPTS>
                                 </env>
                                 <dependsOn>
@@ -264,7 +279,15 @@
                                     <port>${sms-consumer.server.port}:${sms-consumer.server.port}</port>
                                 </ports>
                                 <env>
-                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G -Deureka.instance.nonSecurePort=${sms-consumer.server.port} -Dspring.datasource.driver-class-name=com.mysql.jdbc.Driver -Dspring.datasource.url=jdbc:mysql://${docker.host.address}:3306/${mysql.sms-consumer.schema} -Dspring.datasource.username=${mysql.user.name} -Dspring.datasource.password=${mysql.user.password} -Dopenexchange.sms.consumer.job.parallelism=1 -Dopenexchange.sms.consumer.job.repeatIntervalTimeUnit=SECONDS</JAVA_OPTS>
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G
+                                        -Deureka.instance.nonSecurePort=${sms-consumer.server.port}
+                                        -Dspring.datasource.driver-class-name=com.mysql.jdbc.Driver
+                                        -Dspring.datasource.url=jdbc:mysql://${docker.host.address}:3306/${mysql.sms-consumer.schema}
+                                        -Dspring.datasource.username=${mysql.user.name}
+                                        -Dspring.datasource.password=${mysql.user.password}
+                                        -Dopenexchange.sms.consumer.job.parallelism=1
+                                        -Dopenexchange.sms.consumer.job.repeatIntervalTimeUnit=SECONDS
+                                    </JAVA_OPTS>
                                 </env>
                                 <dependsOn>
                                     <dependsOn>openexchange/configserver:latest</dependsOn>
