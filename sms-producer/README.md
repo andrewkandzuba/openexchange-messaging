@@ -2,6 +2,12 @@
 
 Test service to verify concurrency aspects of JMS/JPA combination from the consumption messages producing aspects
 
+## Bootstrap modes supported:
+
+- spring-boot
+- Cloudfoundry
+- Docker
+
 ## Properties
 
 | Name | Default value | Description | 
@@ -14,6 +20,6 @@ Test service to verify concurrency aspects of JMS/JPA combination from the consu
 
 When run with __docker__ user following environment variable:
 
-|Name|Description|
-|:-:|---|
-|JAVA_OPTS|Pass properties to JVM|     
+|Name|Mandatory|Description|
+|---|:---:|---|
+|**JAVA_OPTS**|x|Contains JVM system properties. At least empty string must be provided.|  

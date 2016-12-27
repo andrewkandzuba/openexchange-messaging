@@ -4,6 +4,10 @@ The local CI environment composer developed on top of io.fabric8::docker-maven-p
 
 # Build phases
 
+## prerequisite 
+
+- set __JAVA_OPTS__ environment variable. You may left it empty if nothing specific is required to be provided to JVM.
+
 ## build
 
 During this phase following images are being built:
