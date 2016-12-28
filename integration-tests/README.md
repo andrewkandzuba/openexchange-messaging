@@ -16,10 +16,13 @@ During this phase following images are being built:
 - __rabbitmq__ - A popular AMPQ implementation serves as a service communication bus 
 - __openexchange/registry:latest__ - Eureka based Service Registry.
 - __openexchange/configserver:latest__ - Spring Cloud based configuration service integrated with GitHub configuration. 
+- __openexchange/sms-producer:latest__ - SMS messages producer.
+- __openexchange/sms-consumer:latest__ - SMS messages consumer.
+
 
 ## start
 
-The containers runs in the following order: mysql -> rabbitmq -> registry -> configserver
+The containers runs in the following order: mysql -> rabbitmq -> registry -> configserver -> sms-producer -> sms-consumer.
 
 ## stop / remove
                                  

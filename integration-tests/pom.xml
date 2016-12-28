@@ -47,7 +47,7 @@
         <mysql.sms-consumer.schema>messaging</mysql.sms-consumer.schema>
         <mysql.rootuser.password>root-changeit</mysql.rootuser.password>
         <mysql.port>3306</mysql.port>
-        <docker.wait.timeout>240000</docker.wait.timeout>
+        <docker.wait.timeout>60000</docker.wait.timeout>
         <sms-producer.server.port>8085</sms-producer.server.port>
         <sms-consumer.server.port>8084</sms-consumer.server.port>
     </properties>
@@ -70,18 +70,10 @@
             </resource>
         </resources>
         <plugins>
-            <!-- plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin -->
+            </plugin>
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
@@ -147,7 +139,6 @@
                                     <port>${rabbitmq.port}:${rabbitmq.port}</port>
                                     <port>${rabbitmq.management.port}:${rabbitmq.management.port}</port>
                                 </ports>
-                                <net>host</net>
                                 <wait>
                                     <http>
                                         <url>http://${docker.host.address}:${rabbitmq.management.port}</url>
@@ -162,7 +153,7 @@
                         </image>
                         <image>
                             <alias>registry</alias>
-                            <name>openexchange/registry:latest</name>
+                            <name>%g/registry:test</name>
                             <build>
                                 <from>openexchange/registry:latest</from>
                             </build>
@@ -170,10 +161,8 @@
                                 <ports>
                                     <port>${registry.server.port}:${registry.server.port}</port>
                                 </ports>
-                                <net>host</net>
                                 <env>
-                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G
-                                    </JAVA_OPTS>
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G</JAVA_OPTS>
                                 </env>
                                 <dependsOn>
                                     <dependsOn>rabbitmq:3-management</dependsOn>
@@ -192,7 +181,7 @@
                         </image>
                         <image>
                             <alias>configserver</alias>
-                            <name>openexchange/configserver:latest</name>
+                            <name>%g/configserver:test</name>
                             <build>
                                 <from>openexchange/configserver:latest</from>
                             </build>
@@ -200,17 +189,20 @@
                                 <ports>
                                     <port>${configuration.server.port}:${configuration.server.port}</port>
                                 </ports>
-                                <net>host</net>
                                 <env>
                                     <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G
                                         -Dspring.cloud.config.server.git.uri=${configuration.server.git.repo}
                                         -Dsecurity.user.password=${configuration.server.password}
+                                        -Deureka.instance.hostname=${docker.host.address}
+                                        -Deureka.instance.nonSecurePort=${configuration.server.port}
                                         -Deureka.instance.metadataMap.user=${configuration.server.user}
                                         -Deureka.instance.metadataMap.password=${configuration.server.password}
+                                        -Dspring.rabbitmq.host=${docker.host.address}
+                                        -Deureka.client.serviceUrl.defaultZone=http://${docker.host.address}:${registry.server.port}/eureka/
                                     </JAVA_OPTS>
                                 </env>
                                 <dependsOn>
-                                    <dependsOn>%g/registry:${project.version}</dependsOn>
+                                    <dependsOn>%g/registry:test</dependsOn>
                                 </dependsOn>
                                 <wait>
                                     <http>
@@ -228,7 +220,7 @@
                         </image>
                         <image>
                             <alias>sms-producer</alias>
-                            <name>openexchange/sms-producer:latest</name>
+                            <name>%g/sms-producer:test</name>
                             <build>
                                 <from>openexchange/sms-producer:latest</from>
                             </build>
@@ -240,16 +232,18 @@
                                 <ports>
                                     <port>${sms-producer.server.port}:${sms-producer.server.port}</port>
                                 </ports>
-                                <net>host</net>
                                 <env>
                                     <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G
+                                        -Deureka.instance.hostname=${docker.host.address}
                                         -Deureka.instance.nonSecurePort=${sms-producer.server.port}
                                         -Dopenexchange.sms.producer.job.parallelism=1
                                         -Dopenexchange.sms.producer.job.repeatIntervalTimeUnit=SECONDS
+                                        -Dspring.rabbitmq.host=${docker.host.address}
+                                        -Deureka.client.serviceUrl.defaultZone=http://${docker.host.address}:${registry.server.port}/eureka/
                                     </JAVA_OPTS>
                                 </env>
                                 <dependsOn>
-                                    <dependsOn>openexchange/configserver:latest</dependsOn>
+                                    <dependsOn>%g/configserver:test</dependsOn>
                                 </dependsOn>
                                 <wait>
                                     <http>
@@ -265,7 +259,7 @@
                         </image>
                         <image>
                             <alias>sms-consumer</alias>
-                            <name>openexchange/sms-consumer:latest</name>
+                            <name>%g/sms-consumer:test</name>
                             <build>
                                 <from>openexchange/sms-consumer:latest</from>
                             </build>
@@ -274,23 +268,25 @@
                                     <name>on-failure</name>
                                     <retry>5</retry>
                                 </restartPolicy>
-                                <net>host</net>
                                 <ports>
                                     <port>${sms-consumer.server.port}:${sms-consumer.server.port}</port>
                                 </ports>
                                 <env>
                                     <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -XX:+AggressiveOpts -Xms512M -Xmx2G
                                         -Deureka.instance.nonSecurePort=${sms-consumer.server.port}
+                                        -Deureka.instance.hostname=${docker.host.address}
                                         -Dspring.datasource.driver-class-name=com.mysql.jdbc.Driver
                                         -Dspring.datasource.url=jdbc:mysql://${docker.host.address}:3306/${mysql.sms-consumer.schema}
                                         -Dspring.datasource.username=${mysql.user.name}
                                         -Dspring.datasource.password=${mysql.user.password}
                                         -Dopenexchange.sms.consumer.job.parallelism=1
                                         -Dopenexchange.sms.consumer.job.repeatIntervalTimeUnit=SECONDS
+                                        -Dspring.rabbitmq.host=${docker.host.address}
+                                        -Deureka.client.serviceUrl.defaultZone=http://${docker.host.address}:${registry.server.port}/eureka/
                                     </JAVA_OPTS>
                                 </env>
                                 <dependsOn>
-                                    <dependsOn>openexchange/configserver:latest</dependsOn>
+                                    <dependsOn>%g/configserver:test</dependsOn>
                                 </dependsOn>
                                 <wait>
                                     <http>
