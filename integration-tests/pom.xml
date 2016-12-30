@@ -165,7 +165,7 @@
                                     <port>${registry.server.port}:${registry.server.port}</port>
                                 </ports>
                                 <env>
-                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -Xms64m -Xmx128m</JAVA_OPTS>
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -Xms64m -Xmx128m -XX:MaxMetaspaceSize=64m</JAVA_OPTS>
                                 </env>
                                 <dependsOn>
                                     <dependsOn>rabbitmq:3-management</dependsOn>
@@ -194,7 +194,7 @@
                                     <port>${configuration.server.port}:${configuration.server.port}</port>
                                 </ports>
                                 <env>
-                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -Xms64m -Xmx128m
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -Xms64m -Xmx128m -XX:MaxMetaspaceSize=64m
                                         -Dspring.cloud.config.server.git.uri=${configuration.server.git.repo}
                                         -Dsecurity.user.password=${configuration.server.password}
                                         -Deureka.instance.nonSecurePort=${configuration.server.port}
@@ -235,7 +235,7 @@
                                     <port>${sms-producer.server.port}:${sms-producer.server.port}</port>
                                 </ports>
                                 <env>
-                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -Xms64m -Xmx128m
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -Xms64m -Xmx128m -XX:MaxMetaspaceSize=64m
                                         -Deureka.instance.nonSecurePort=${sms-producer.server.port}
                                         -Dopenexchange.sms.producer.job.parallelism=1
                                         -Dopenexchange.sms.producer.job.repeatIntervalTimeUnit=SECONDS
@@ -272,7 +272,7 @@
                                     <port>${sms-consumer.server.port}:${sms-consumer.server.port}</port>
                                 </ports>
                                 <env>
-                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -Xms64m -Xmx128m
+                                    <JAVA_OPTS>${env.JAVA_OPTS} -server -ea -Xms64m -Xmx128m -XX:MaxMetaspaceSize=96m
                                         -Deureka.instance.nonSecurePort=${sms-consumer.server.port}
                                         -Dspring.datasource.driver-class-name=com.mysql.jdbc.Driver
                                         -Dspring.datasource.url=jdbc:mysql://${docker.host.address}:3306/${mysql.sms-consumer.schema}
