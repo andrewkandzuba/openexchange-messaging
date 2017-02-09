@@ -5,11 +5,11 @@
     <parent>
         <groupId>io.openexchange</groupId>
         <artifactId>openexchange-messaging</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>sms-consumer</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>openexchange ::: ${project.artifactId}</name>
@@ -30,12 +30,12 @@
         <dependency>
             <groupId>io.openexchange</groupId>
             <artifactId>sms</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.openexchange</groupId>
             <artifactId>rabbitmq-sms-transport</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
