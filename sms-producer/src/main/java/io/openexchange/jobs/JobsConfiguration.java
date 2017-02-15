@@ -23,7 +23,9 @@ public class JobsConfiguration {
         this.smsProducer = smsProducer;
     }
 
-    @Job(parallelism = "${openexchange.sms.producer.job.parallelism:4}", repeatIntervalTimeUnit = "${openexchange.sms.producer.job.repeatIntervalTimeUnit:MINUTES}")
+    @Job(parallelism = "${openexchange.sms.producer.job.parallelism:4}",
+            repeatInterval = "${openexchange.sms.producer.job.repeatInterval:10}",
+            repeatIntervalTimeUnit = "${openexchange.sms.producer.job.repeatIntervalTimeUnit:SECONDS}")
     public void jobSmsProducer() {
         smsProducer.send(new Sms()
                 .withMessageId(UUID.randomUUID())

@@ -1,6 +1,5 @@
 package io.openexchange.integration;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.jdbc.JdbcTestUtils;
+
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.jdbc.JdbcTestUtils.countRowsInTable;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SmsReceiptIT.class)
@@ -21,10 +22,12 @@ public class SmsReceiptIT {
 
     @Test
     public void smsReceipt() throws Exception {
-        int retries = 10;
-        while (--retries > 0) {
-            Assert.assertTrue(JdbcTestUtils.countRowsInTable(jdbcTemplate, "sms") > 0);
+        int retries = 100;
+        int registered = 0;
+        while (--retries > 0 && registered == 0) {
+            registered += countRowsInTable(jdbcTemplate, "sms");
             Thread.sleep(1000);
         }
+        assertTrue(registered > 0);
     }
 }

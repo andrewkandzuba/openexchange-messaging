@@ -13,7 +13,9 @@ The service produces `io.openexchange.pojos.SMS` and sends them away into bind S
 | Name | Default value | Description | 
 | --- | --- | --- |
 | server.port | 8085 | A local bind port |
-| spring.producer.concurrency | 1 | The number of parallel producers |
+| openexchange.sms.producer.job.parallelism | 4 | The number of parallel producers |
+| openexchange.sms.producer.job.repeatInterval | 10 | The repeat rate |
+| openexchange.sms.producer.job.repeatIntervalTimeUnit | MINUTES | The repeat rate time units |
 
 ## Docker
 
