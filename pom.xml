@@ -26,11 +26,30 @@
 
     <modules>
         <module>sms</module>
-        <module>activemq-sms-transport</module>
         <module>sms-consumer</module>
         <module>sms-producer</module>
-        <module>rabbitmq-sms-transport</module>
         <module>integration-tests</module>
     </modules>
+
+    <properties>
+        <registry.server.port>8761</registry.server.port>
+        <configuration.server.port>8888</configuration.server.port>
+        <configuration.server.user>user</configuration.server.user>
+        <configuration.server.password>changeit</configuration.server.password>
+        <configuration.server.git.repo>https://github.com/andrewkandzuba/openexchange-configuration.git
+        </configuration.server.git.repo>
+        <rabbitmq.port>5672</rabbitmq.port>
+        <rabbitmq.management.port>15672</rabbitmq.management.port>
+        <mysql.user.name>dev</mysql.user.name>
+        <mysql.user.password>changeit</mysql.user.password>
+        <mysql.sms-consumer.schema>messaging</mysql.sms-consumer.schema>
+        <mysql.rootuser.password>root-changeit</mysql.rootuser.password>
+        <mysql.port>3306</mysql.port>
+        <docker.wait.timeout>60000</docker.wait.timeout>
+        <sms-producer.server.port>8085</sms-producer.server.port>
+        <sms-consumer.server.port>8084</sms-consumer.server.port>
+        <cloud.stream.topic>smsTopic</cloud.stream.topic>
+        <cloud.stream.group>smsGroup</cloud.stream.group>
+    </properties>
 
 </project>

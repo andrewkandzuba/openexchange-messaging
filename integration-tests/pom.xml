@@ -32,25 +32,6 @@
         </dependency>
     </dependencies>
 
-    <properties>
-        <registry.server.port>8761</registry.server.port>
-        <configuration.server.port>8888</configuration.server.port>
-        <configuration.server.user>user</configuration.server.user>
-        <configuration.server.password>changeit</configuration.server.password>
-        <configuration.server.git.repo>https://github.com/andrewkandzuba/openexchange-configuration.git
-        </configuration.server.git.repo>
-        <rabbitmq.port>5672</rabbitmq.port>
-        <rabbitmq.management.port>15672</rabbitmq.management.port>
-        <mysql.user.name>dev</mysql.user.name>
-        <mysql.user.password>changeit</mysql.user.password>
-        <mysql.sms-consumer.schema>messaging</mysql.sms-consumer.schema>
-        <mysql.rootuser.password>root-changeit</mysql.rootuser.password>
-        <mysql.port>3306</mysql.port>
-        <docker.wait.timeout>60000</docker.wait.timeout>
-        <sms-producer.server.port>8085</sms-producer.server.port>
-        <sms-consumer.server.port>8084</sms-consumer.server.port>
-    </properties>
-
     <build>
         <resources>
             <resource>
@@ -236,6 +217,7 @@
                                         -Deureka.instance.nonSecurePort=${sms-producer.server.port}
                                         -Dopenexchange.sms.producer.job.parallelism=1
                                         -Dopenexchange.sms.producer.job.repeatIntervalTimeUnit=SECONDS
+                                        -Dspring.cloud.stream.bindings.output.destination=${cloud.stream.topic}
                                     </JAVA_OPTS>
                                 </env>
                                 <restartPolicy>
@@ -277,6 +259,8 @@
                                         -Dspring.datasource.password=${mysql.user.password}
                                         -Dopenexchange.sms.consumer.job.parallelism=1
                                         -Dopenexchange.sms.consumer.job.repeatIntervalTimeUnit=SECONDS
+                                        -Dspring.cloud.stream.bindings.input.destination=${cloud.stream.topic}
+                                        -Dspring.cloud.stream.bindings.input.group=${cloud.stream.group}
                                     </JAVA_OPTS>
                                 </env>
                                 <restartPolicy>

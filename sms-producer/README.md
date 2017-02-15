@@ -1,6 +1,6 @@
 # Sms Production Service
 
-Test service to verify concurrency aspects of JMS/JPA combination from the consumption messages producing aspects
+The service produces `io.openexchange.pojos.SMS` and sends them away into bind Spring Cloud Bus.   
 
 ## Bootstrap modes supported:
 
@@ -13,13 +13,14 @@ Test service to verify concurrency aspects of JMS/JPA combination from the consu
 | Name | Default value | Description | 
 | --- | --- | --- |
 | server.port | 8085 | A local bind port |
-| sms.outbound.queue.write.chunk.size | 100 | The most number of messages produced ber a turn  |
 | spring.producer.concurrency | 1 | The number of parallel producers |
 
 ## Docker
 
-When run with __docker__ user following environment variable:
+When it's been bootstrapped with __docker__ the following environment variable must be specified
 
 |Name|Mandatory|Description|
 |---|:---:|---|
-|**JAVA_OPTS**|x|Contains JVM system properties. At least empty string must be provided.|  
+|**JAVA_OPTS**|x|Contains JVM system properties. At least empty string must be provided.| 
+ 
+ 
