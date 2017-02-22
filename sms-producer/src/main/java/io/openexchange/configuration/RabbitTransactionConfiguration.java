@@ -1,11 +1,11 @@
-package io.openexchange.amqp;
+package io.openexchange.configuration;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.transaction.RabbitTransactionManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -14,12 +14,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@RefreshScope
 @EnableTransactionManagement
-public class AmqpAutoConfiguration {
+public class RabbitTransactionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(PlatformTransactionManager.class)
+    @ConditionalOnProperty(name = "spring.cloud.stream.default-binder", havingValue = "rabbit")
     public PlatformTransactionManager transactionManager(ConnectionFactory connectionFactory) {
         return new RabbitTransactionManager(connectionFactory);
     }

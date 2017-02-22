@@ -1,5 +1,6 @@
-package io.openexchange.jobs;
+package io.openexchange.configuration;
 
+import io.openexchange.jobs.Job;
 import io.openexchange.producers.SmsProducer;
 import io.openexchange.pojos.Sms;
 import org.springframework.beans.factory.annotation.Autowired;
