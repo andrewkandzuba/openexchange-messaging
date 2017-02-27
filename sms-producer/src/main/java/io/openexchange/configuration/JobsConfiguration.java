@@ -1,6 +1,7 @@
 package io.openexchange.configuration;
 
 import io.openexchange.jobs.Job;
+import io.openexchange.producers.ProduceException;
 import io.openexchange.producers.SmsProducer;
 import io.openexchange.pojos.Sms;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class JobsConfiguration {
     @Job(parallelism = "${openexchange.sms.producer.job.parallelism:4}",
             repeatInterval = "${openexchange.sms.producer.job.repeatInterval:10}",
             repeatIntervalTimeUnit = "${openexchange.sms.producer.job.repeatIntervalTimeUnit:SECONDS}")
-    public void jobSmsProducer() {
+    public void jobSmsProducer() throws ProduceException {
         smsProducer.send(new Sms()
                 .withMessageId(UUID.randomUUID())
                 .withMobileOriginate("+37258211717")

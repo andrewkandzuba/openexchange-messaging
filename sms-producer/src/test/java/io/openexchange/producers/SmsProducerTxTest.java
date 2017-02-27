@@ -1,7 +1,7 @@
 package io.openexchange.producers;
 
 import io.openexchange.pojos.Sms;
-import io.openexchange.tx.MonitorablePseudoTransactionManager;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,13 +21,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.sql.Date;
 import java.time.Instant;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -35,7 +38,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 @SpringBootTest(classes = {
         SmsProducerTxTest.class,
         SmsProducerTxTest.TestApplication.class,
-        SmsProducer.class
+        SmsProducer.class,
+        TxMonitor.class
 })
 @DirtiesContext
 @TestPropertySource(locations = {
@@ -51,12 +55,11 @@ public class SmsProducerTxTest {
     @SpyBean
     private SmsProducer smsProducer;
     @Autowired
-    private PlatformTransactionManager platformTransactionManager;
+    private TxMonitor txMonitor;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        assertTrue(platformTransactionManager instanceof MonitorablePseudoTransactionManager);
     }
 
     @Test
@@ -69,16 +72,53 @@ public class SmsProducerTxTest {
                 .withMobileTerminate("22222222")
                 .withReceiveTime(Date.from(Instant.now()))
                 .withText("hello!"));
-        assertTrue(((MonitorablePseudoTransactionManager)platformTransactionManager).transactions().count() > 0);
+        Assert.assertEquals(1, txMonitor.getCommitsCounter());
+    }
+
+    @Test
+    public void transactionRollback() throws Exception {
+        when(source.output()).thenReturn(channel);
+        when(channel.send(Mockito.any())).thenReturn(false);
+
+        try {
+            smsProducer.send(new Sms()
+                    .withMessageId(UUID.randomUUID())
+                    .withMobileOriginate("11111111")
+                    .withMobileTerminate("22222222")
+                    .withReceiveTime(Date.from(Instant.now()))
+                    .withText("hello!"));
+        } catch (ProduceException ignore) {
+        }
+
+        Assert.assertEquals(1, txMonitor.getRollbackCounter());
     }
 
     @SpringBootApplication
     @EnableBinding({Source.class, Sink.class})
     @EnableTransactionManagement(proxyTargetClass = true)
     public static class TestApplication {
+        @Autowired
+        private TxMonitor txMonitor;
+
         @Bean
-        public PlatformTransactionManager platformTransactionManager(){
-            return new MonitorablePseudoTransactionManager();
+        public PlatformTransactionManager platformTransactionManager() {
+            return new PlatformTransactionManager() {
+
+                @Override
+                public TransactionStatus getTransaction(TransactionDefinition transactionDefinition) throws TransactionException {
+                    return new SimpleTransactionStatus(true);
+                }
+
+                @Override
+                public void commit(TransactionStatus transactionStatus) throws TransactionException {
+                    txMonitor.registerCommit();
+                }
+
+                @Override
+                public void rollback(TransactionStatus transactionStatus) throws TransactionException {
+                    txMonitor.registerRollback();
+                }
+            };
         }
     }
 }

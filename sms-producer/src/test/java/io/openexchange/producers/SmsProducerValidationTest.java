@@ -4,11 +4,11 @@ import io.openexchange.pojos.Sms;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.TestPropertySource;
@@ -28,13 +28,13 @@ import static org.mockito.MockitoAnnotations.initMocks;
         "classpath:test.binders.properties"
 })
 public class SmsProducerValidationTest {
-    @InjectMocks
-    private SmsProducer smsProducer;
     @MockBean
     private Source source;
     @MockBean
     @Qualifier(Source.OUTPUT)
     private MessageChannel channel;
+    @SpyBean
+    private SmsProducer smsProducer;
 
     @Before
     public void setUp() throws Exception {
