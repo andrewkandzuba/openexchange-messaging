@@ -1,12 +1,12 @@
 package io.openexchange.producers;
 
 import io.openexchange.pojos.Sms;
-import org.junit.Assert;
+import io.openexchange.producers.components.TxMonitorComponent;
+import io.openexchange.producers.components.TxWrapperComponent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,21 +27,26 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
+import javax.inject.Inject;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFORE_METHOD;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
         SmsProducerTxTest.class,
         SmsProducerTxTest.TestApplication.class,
         SmsProducer.class,
-        TxMonitor.class
+        TxMonitorComponent.class,
+        TxWrapperComponent.class
 })
-@DirtiesContext
+@DirtiesContext(methodMode = BEFORE_METHOD)
 @TestPropertySource(locations = {
         "classpath:test.properties",
         "classpath:test.binders.properties"
@@ -54,51 +59,71 @@ public class SmsProducerTxTest {
     private MessageChannel channel;
     @SpyBean
     private SmsProducer smsProducer;
-    @Autowired
-    private TxMonitor txMonitor;
+    @Inject
+    private TxMonitorComponent txMonitorComponent;
+    @Inject
+    private TxWrapperComponent txWrapperComponent;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        txWrapperComponent.forceFlush();
+        txMonitorComponent.reset();
     }
 
     @Test
     public void transactionCommit() throws Exception {
         when(source.output()).thenReturn(channel);
         when(channel.send(Mockito.any())).thenReturn(true);
-        smsProducer.send(new Sms()
-                .withMessageId(UUID.randomUUID())
-                .withMobileOriginate("11111111")
-                .withMobileTerminate("22222222")
-                .withReceiveTime(Date.from(Instant.now()))
-                .withText("hello!"));
-        Assert.assertEquals(1, txMonitor.getCommitsCounter());
+        smsProducer.send(create());
+        assertThat(txMonitorComponent.countCommits()).isEqualTo(1);
+        assertThat(txMonitorComponent.countRollbacks()).isEqualTo(0);
     }
 
     @Test
     public void transactionRollback() throws Exception {
         when(source.output()).thenReturn(channel);
         when(channel.send(Mockito.any())).thenReturn(false);
+        assertThatThrownBy(() -> smsProducer.send(create())).isInstanceOf(ProduceException.class);
+        assertThat(txMonitorComponent.countCommits()).isEqualTo(0);
+        assertThat(txMonitorComponent.countRollbacks()).isEqualTo(1);
+    }
 
-        try {
-            smsProducer.send(new Sms()
-                    .withMessageId(UUID.randomUUID())
-                    .withMobileOriginate("11111111")
-                    .withMobileTerminate("22222222")
-                    .withReceiveTime(Date.from(Instant.now()))
-                    .withText("hello!"));
-        } catch (ProduceException ignore) {
-        }
+    @Test
+    public void propagateSuccess() throws Exception {
+        when(source.output()).thenReturn(channel);
+        when(channel.send(Mockito.any())).thenReturn(true);
+        txWrapperComponent.schedule(create()).sendOneWaiting();
+        assertThat(txMonitorComponent.countCommits()).isEqualTo(2);
+        assertThat(txMonitorComponent.countRollbacks()).isEqualTo(0);
+        assertThat(txWrapperComponent.peek()).isNull();
+    }
 
-        Assert.assertEquals(1, txMonitor.getRollbackCounter());
+    @Test
+    public void propagateRollback() throws Exception {
+        when(source.output()).thenReturn(channel);
+        when(channel.send(Mockito.any())).thenReturn(false);
+        assertThatThrownBy(() -> txWrapperComponent.schedule(create()).sendOneWaiting()).isInstanceOf(ProduceException.class);
+        assertThat(txMonitorComponent.countCommits()).isEqualTo(0);
+        assertThat(txMonitorComponent.countRollbacks()).isEqualTo(2);
+        assertThat(txWrapperComponent.peek()).isNotNull();
+    }
+
+    private static Sms create() {
+        return new Sms()
+                .withMessageId(UUID.randomUUID())
+                .withMobileOriginate("11111111")
+                .withMobileTerminate("22222222")
+                .withReceiveTime(Date.from(Instant.now()))
+                .withText("hello!");
     }
 
     @SpringBootApplication
     @EnableBinding({Source.class, Sink.class})
     @EnableTransactionManagement(proxyTargetClass = true)
     public static class TestApplication {
-        @Autowired
-        private TxMonitor txMonitor;
+        @Inject
+        private TxMonitorComponent txMonitorComponent;
 
         @Bean
         public PlatformTransactionManager platformTransactionManager() {
@@ -111,12 +136,12 @@ public class SmsProducerTxTest {
 
                 @Override
                 public void commit(TransactionStatus transactionStatus) throws TransactionException {
-                    txMonitor.registerCommit();
+                    txMonitorComponent.registerCommit();
                 }
 
                 @Override
                 public void rollback(TransactionStatus transactionStatus) throws TransactionException {
-                    txMonitor.registerRollback();
+                    txMonitorComponent.registerRollback();
                 }
             };
         }

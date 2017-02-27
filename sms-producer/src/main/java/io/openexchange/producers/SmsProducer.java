@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.*;
@@ -23,7 +24,7 @@ public class SmsProducer {
         this.source = source;
     }
 
-    @Transactional(rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED)
     public void send(Sms sms) throws ProduceException {
         logger.debug("Validating sms:[" + sms + "]");
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -37,7 +38,7 @@ public class SmsProducer {
 
         logger.debug(String.format("Sending sms:[%s]", sms));
         if (!source.output().send(MessageBuilder.withPayload(sms).build())) {
-            logger.error(String.format("Sms has not been send: [%s]", sms));
+            logger.error(String.format("Sms has not been sent: [%s]", sms));
             throw new ProduceException();
         }
     }
